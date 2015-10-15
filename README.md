@@ -1,2 +1,2 @@
-# ananconda3-docker
-Ananconda Python3 Docker
+# anaconda3-docker
+Anaconda Python3 Docker
