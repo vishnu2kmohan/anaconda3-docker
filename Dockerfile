@@ -32,7 +32,9 @@ ENV PATH /opt/conda/bin:$PATH
 
 RUN echo 'export PATH=/opt/conda/bin:$PATH' >> /etc/profile.d/conda.sh && \
     conda update --all --yes && \
-    conda install pip virtualenv anaconda-client --yes
+    conda install pip virtualenv anaconda-client --yes && \
+    conda clean --packages && \
+    conda clean --tarballs
 
 COPY anaconda.sh /usr/local/bin/
 RUN adduser -D conda
@@ -40,5 +42,6 @@ RUN chmod +x /usr/local/bin/anaconda.sh
 
 WORKDIR /home/conda
 USER conda
+RUN conda create -n local_conda --clone=/opt/conda
 
 ENTRYPOINT ["/usr/local/bin/anaconda.sh"]
