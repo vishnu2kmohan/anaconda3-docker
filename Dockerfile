@@ -1,10 +1,14 @@
 FROM alpine:edge
 
+MAINTAINER Vishnu Mohan <vishnu@mesosphere.com>
+
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
+
+ENV PATH /opt/conda/bin:$PATH
 
 # Here we use several hacks collected from https://github.com/gliderlabs/docker-alpine/issues/11:
 # 1. install GLibc (which is not the cleanest solution at all) 
@@ -12,11 +16,16 @@ ENV LANGUAGE=en_US.UTF-8
 
 RUN apk --update add \
     bash \
+    bzip2 \
     curl \
     ca-certificates \
     git \
+    glib \
     jq \
     libstdc++ \
+    libsm \
+    libxext \
+    libxrender \
     openssh-client && \
     cd /tmp && \
     wget "https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64/glibc-2.21-r2.apk" \
@@ -26,15 +35,12 @@ RUN apk --update add \
     echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
     wget "https://repo.continuum.io/archive/Anaconda3-2.3.0-Linux-x86_64.sh" && \
     bash ./Anaconda3-2.3.0-Linux-x86_64.sh -b -p /opt/conda && \
-    rm /tmp/* /var/cache/apk/*
-
-ENV PATH /opt/conda/bin:$PATH
-
-RUN echo 'export PATH=/opt/conda/bin:$PATH' >> /etc/profile.d/conda.sh && \
+    rm /tmp/* /var/cache/apk/* && \
+    echo 'export PATH=/opt/conda/bin:$PATH' >> /etc/profile.d/conda.sh && \
     conda update --all --yes && \
     conda install pip virtualenv anaconda-client --yes && \
-    conda clean --packages && \
-    conda clean --tarballs
+    conda clean --packages --yes && \
+    conda clean --tarballs --yes
 
 COPY anaconda.sh /usr/local/bin/
 RUN adduser -D conda
