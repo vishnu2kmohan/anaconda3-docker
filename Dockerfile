@@ -39,8 +39,8 @@ RUN apk --update add \
     echo 'export PATH=/opt/conda/bin:$PATH' >> /etc/profile.d/conda.sh && \
     conda update --all --yes && \
     conda install pip virtualenv anaconda-client --yes && \
-    conda clean --packages --yes && \
-    conda clean --tarballs --yes
+    conda clean --tarballs --yes && \
+    conda clean --packages --yes
 
 COPY anaconda.sh /usr/local/bin/
 RUN adduser -D conda
