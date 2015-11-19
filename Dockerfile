@@ -17,10 +17,9 @@ ENV LC_ALL=en_US.UTF-8 \
     CONDA_USER_HOME=/home/conda \
     PATH=/opt/conda/bin:$PATH
 
-# Here we use several hacks collected from https://github.com/gliderlabs/docker-alpine/issues/11:
+# Here we use several hacks collected from https://github.com/gliderlabs/docker-alpine/issues/11
 # 1. install GLibc (which is not the cleanest solution at all) 
 # 2. hotfix /etc/nsswitch.conf, which is apperently required by glibc and is not used in Alpine Linux
-
 RUN apk --update add \
     bash \
     bzip2 \
@@ -34,6 +33,7 @@ RUN apk --update add \
     libxext \
     libxrender \
     openssh-client \
+    readline \
     && apk add --update --repository ${ALPINE_EDGE_TESTING_REPO} tini \
     && cd /tmp \
     && wget ${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_PACKAGE} ${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_BIN_PACKAGE} \
