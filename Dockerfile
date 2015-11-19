@@ -7,6 +7,7 @@ MAINTAINER Vishnu Mohan <vishnu@mesosphere.com>
 ENV LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8 \
+    ALPINE_EDGE_TESTING_REPO="http://dl-1.alpinelinux.org/alpine/edge/testing/" \
     ALPINE_GLIBC_BASE_URL="https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64" \
     ALPINE_GLIBC_PACKAGE="glibc-2.21-r2.apk" \
     ALPINE_GLIBC_BIN_PACKAGE="glibc-bin-2.21-r2.apk" \
@@ -33,10 +34,10 @@ RUN apk --update add \
     libxext \
     libxrender \
     openssh-client \
-    && apk add --update --repository http://dl-1.alpinelinux.org/alpine/edge/testing/ tini \
+    && apk add --update --repository ${ALPINE_EDGE_TESTING_REPO} tini \
     && cd /tmp \
     && wget ${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_PACKAGE} ${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_BIN_PACKAGE} \
-    && apk add --allow-untrusted glibc-2.21-r2.apk glibc-bin-2.21-r2.apk \
+    && apk add --allow-untrusted ${ALPINE_GLIBC_PACKAGE} ${ALPINE_GLIBC_BIN_PACKAGE} \
     && /usr/glibc/usr/bin/ldconfig /lib /usr/glibc/usr/lib \
     && echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf \
     && wget "https://repo.continuum.io/archive/Anaconda3-${ANACONDA_VERSION}-Linux-x86_64.sh" \
