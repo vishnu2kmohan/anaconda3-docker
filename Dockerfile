@@ -55,7 +55,6 @@ USER conda
 RUN conda create -n local_conda --clone=${CONDA_DIR}
 
 COPY anaconda.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/anaconda.sh
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/anaconda.sh"]
