@@ -1,11 +1,7 @@
 #!/bin/bash
 
-echo "Conda Info:"
 conda info
-echo ""
-echo "Conda Package List:"
 conda list
-echo ""
+conda env list
 source activate local_conda
 bash
-
