@@ -3,5 +3,5 @@
 conda info
 conda list
 conda env list
-source activate local_conda
+source activate conda3
 bash

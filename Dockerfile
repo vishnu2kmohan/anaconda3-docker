@@ -47,15 +47,14 @@ RUN apk --update add \
     && bash ./"${CONDA_INSTALLER}" -b -p /opt/conda \
     && rm /tmp/* /var/cache/apk/* \
     && echo 'export PATH=/opt/conda/bin:$PATH' >> /etc/profile.d/conda.sh \
-    && conda update --all --yes \
-    && conda install pip virtualenv anaconda-client --yes \
-    && conda clean --tarballs --yes \
-    && conda clean --packages --yes
+    && conda update --quiet --yes --all \
+    && conda clean --yes --tarballs \
+    && conda clean --yes --packages
 
 RUN adduser -s /bin/bash -G users -D ${CONDA_USER}
 WORKDIR ${CONDA_USER_HOME}
 USER conda
-RUN conda create -n local_conda --clone=${CONDA_DIR}
+RUN conda create --quiet -n conda3 --clone=${CONDA_DIR}
 
 ENTRYPOINT ["tini", "--"]
 CMD ["conda.sh"]
