@@ -1,22 +1,24 @@
-FROM alpine:edge
+FROM alpine:3.3
 
 MAINTAINER Vishnu Mohan <vishnu@mesosphere.com>
 
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
-ENV LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8 \
-    ALPINE_EDGE_TESTING_REPO=http://dl-1.alpinelinux.org/alpine/edge/testing \
-    ALPINE_GLIBC_BASE_URL=https://circle-artifacts.com/gh/andyshinn/alpine-pkg-glibc/6/artifacts/0/home/ubuntu/alpine-pkg-glibc/packages/x86_64 \
-    ALPINE_GLIBC_PACKAGE=glibc-2.21-r2.apk \
-    ALPINE_GLIBC_BIN_PACKAGE=glibc-bin-2.21-r2.apk \
+ENV ALPINE_EDGE_COMMUNITY_REPO=http://dl-cdn.alpinelinux.org/alpine/edge/community \
+    ALPINE_GLIBC_BASE_URL=https://github.com/andyshinn/alpine-pkg-glibc/releases/download/unreleased \
+    ALPINE_GLIBC_PACKAGE=glibc-2.23-r1.apk \
+    ALPINE_GLIBC_BIN_PACKAGE=glibc-bin-2.23-r1.apk \
+    ALPINE_GLIBC_I18N_PACKAGE=glibc-i18n-2.23-r1.apk \
+    ANDY_SHINN_RSA_PUB_URL=https://raw.githubusercontent.com/andyshinn/alpine-pkg-glibc/master/andyshinn.rsa.pub \
     CONDA_REPO=https://repo.continuum.io \
     CONDA_TYPE=archive \
-    CONDA_INSTALLER=Anaconda3-2.4.0-Linux-x86_64.sh \
+    CONDA_INSTALLER=Anaconda3-4.0.0-Linux-x86_64.sh \
     CONDA_DIR=/opt/conda \
     CONDA_USER=conda \
     CONDA_USER_HOME=/home/conda \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
     PATH=/opt/conda/bin:$PATH
 
 # Here we use several hacks collected from https://github.com/gliderlabs/docker-alpine/issues/11
@@ -29,23 +31,32 @@ RUN apk --update add \
     curl \
     git \
     glib \
+    expat \
     jq \
+    less \
+    libgcc \
     libsm \
     libstdc++ \
     libxext \
     libxrender \
+    ncurses-terminfo-base \
+    ncurses-terminfo \
+    ncurses-libs \
     openssh-client \
     readline \
-    && apk add --update --repository ${ALPINE_EDGE_TESTING_REPO} tini \
+    unzip \
+    && apk add --update --repository ${ALPINE_EDGE_COMMUNITY_REPO} tini \
     && cd /tmp \
+    && wget -q -O /etc/apk/keys/andyshinn.rsa.pub "${ANDY_SHINN_RSA_PUB_URL}" \
     && wget -q "${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_PACKAGE}" \
-       "${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_BIN_PACKAGE}" \
-    && apk add --allow-untrusted ${ALPINE_GLIBC_PACKAGE} ${ALPINE_GLIBC_BIN_PACKAGE} \
-    && /usr/glibc/usr/bin/ldconfig /lib /usr/glibc/usr/lib \
-    && echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf \
+               "${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_BIN_PACKAGE}" \
+               "${ALPINE_GLIBC_BASE_URL}/${ALPINE_GLIBC_I18N_PACKAGE}" \
+    && apk add ${ALPINE_GLIBC_PACKAGE} ${ALPINE_GLIBC_BIN_PACKAGE} ${ALPINE_GLIBC_I18N_PACKAGE} \
+    && /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8 \
     && wget -q "${CONDA_REPO}/${CONDA_TYPE}/${CONDA_INSTALLER}" \
     && bash ./"${CONDA_INSTALLER}" -b -p /opt/conda \
-    && rm /tmp/* /var/cache/apk/* \
+    && cd \
+    && rm -rf /tmp/* /var/cache/apk/* \
     && echo 'export PATH=/opt/conda/bin:$PATH' >> /etc/profile.d/conda.sh \
     && conda update --quiet --yes --all \
     && conda clean --yes --tarballs \
